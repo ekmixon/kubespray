@@ -303,11 +303,11 @@ class TestInventory(unittest.TestCase):
         hosts = OrderedDict()
 
         for hostid in range(1, num_nodes+1):
-            hosts["node" + str(hostid)] = ""
+            hosts[f"node{str(hostid)}"] = ""
 
         self.inv.set_all(hosts)
-        self.inv.set_etcd(list(hosts.keys())[0:3])
-        self.inv.set_kube_control_plane(list(hosts.keys())[0:2])
+        self.inv.set_etcd(list(hosts.keys())[:3])
+        self.inv.set_kube_control_plane(list(hosts.keys())[:2])
         self.inv.set_kube_node(hosts.keys())
         for h in range(3):
             self.assertFalse(
@@ -319,10 +319,10 @@ class TestInventory(unittest.TestCase):
         hosts = OrderedDict()
 
         for hostid in range(1, num_nodes+1):
-            hosts["node" + str(hostid)] = ""
+            hosts[f"node{str(hostid)}"] = ""
 
         self.inv.set_all(hosts)
-        self.inv.set_etcd(list(hosts.keys())[0:3])
+        self.inv.set_etcd(list(hosts.keys())[:3])
         self.inv.set_kube_control_plane(list(hosts.keys())[3:5])
         self.inv.set_kube_node(hosts.keys())
         for h in range(5):

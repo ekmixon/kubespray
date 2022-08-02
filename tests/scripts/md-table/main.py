@@ -56,21 +56,21 @@ class Data:
         out = ''
         for container_manager in self.db.get_unique_ids('container_manager'):
             # Prepare the headers
-            out += "# " + container_manager + "\n"
+            out += f"# {container_manager}" + "\n"
             headers = '|OS / CNI| '
             underline = '|----|'
             for network_plugin in self.db.get_unique_ids("network_plugin"):
-                headers += network_plugin + ' | '
+                headers += f'{network_plugin} | '
                 underline += '----|'
             out += headers + "\n" + underline + "\n"
             for operating_system in self.db.get_unique_ids("operating_system"):
-                out += '| ' + operating_system + ' | '
+                out += f'| {operating_system} | '
                 for network_plugin in self.db.get_unique_ids("network_plugin"):
                     if self.exists(container_manager, network_plugin, operating_system):
                         emoji = ':white_check_mark:'
                     else:
                         emoji = ':x:'
-                    out += emoji + ' | '
+                    out += f'{emoji} | '
                 out += "\n"
 
         pprint(self.db.get_unique_ids('operating_system'))
@@ -91,7 +91,7 @@ for f in files:
     container_manager = y.get('container_manager', 'docker')
     network_plugin = y.get('kube_network_plugin', 'calico')
     x = re.match(r"^[a-z-]+_([a-z0-9]+).*", f.name)
-    operating_system = x.group(1)
+    operating_system = x[1]
     data.set(container_manager=container_manager, network_plugin=network_plugin, operating_system=operating_system)
 #print(data.markdown())
 print(data.jinja())

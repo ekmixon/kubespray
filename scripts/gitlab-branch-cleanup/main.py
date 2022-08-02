@@ -32,7 +32,6 @@ p = gl.projects.get(args.project)
 for b in p.branches.list(all=True):
     date = datetime.fromisoformat(b.commit['created_at'])
     if date < limit and not b.protected and not b.default and b.name.startswith(args.prefix):
-        print("Deleting branch %s from %s ..." %
-            (b.name, date.date().isoformat()))
+        print(f"Deleting branch {b.name} from {date.date().isoformat()} ...")
         if not args.dry_run:
             b.delete()

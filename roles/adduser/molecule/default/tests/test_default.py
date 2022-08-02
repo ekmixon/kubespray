@@ -22,11 +22,10 @@ def read_playbook(playbook):
 def get_playbook():
     with open(os.path.realpath(' '.join(map(str,glob.glob('molecule.*')))), 'r') as yamlfile:
         data = yaml.load(yamlfile, Loader=yaml.FullLoader)
-        if 'playbooks' in data['provisioner'].keys():
-            if 'converge' in data['provisioner']['playbooks'].keys():
-                return data['provisioner']['playbooks']['converge']
-        else:
+        if 'playbooks' not in data['provisioner'].keys():
             return ' '.join(map(str,glob.glob('converge.*')))
+        if 'converge' in data['provisioner']['playbooks'].keys():
+            return data['provisioner']['playbooks']['converge']
 
 def test_user(host):
     for vars in read_playbook(get_playbook()):

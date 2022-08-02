@@ -9,7 +9,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 def test_run(host):
     gvisorruntime = "/usr/local/bin/runsc"
     with host.sudo():
-        cmd = host.command(gvisorruntime + " --version")
+        cmd = host.command(f"{gvisorruntime} --version")
     assert cmd.rc == 0
     assert "runsc version" in cmd.stdout
 
@@ -17,7 +17,8 @@ def test_run(host):
 def test_run_pod(host):
     runtime = "runsc"
 
-    run_command = "/usr/local/bin/crictl run --with-pull --runtime {} /tmp/container.json /tmp/sandbox.json".format(runtime)
+    run_command = f"/usr/local/bin/crictl run --with-pull --runtime {runtime} /tmp/container.json /tmp/sandbox.json"
+
     with host.sudo():
         cmd = host.command(run_command)
     assert cmd.rc == 0

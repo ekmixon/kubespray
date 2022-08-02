@@ -274,7 +274,7 @@ class KubesprayInventory(object):
             return [ip_address(ip).exploded for ip in range(start, end + 1)]
 
         for host in hosts:
-            if '-' in host and not (host.startswith('-') or host[0].isalpha()):
+            if '-' in host and not host.startswith('-') and not host[0].isalpha():
                 start, end = host.strip().split('-')
                 try:
                     reworked_hosts.extend(ips(start, end))
@@ -288,10 +288,10 @@ class KubesprayInventory(object):
         return hostname in existing_hosts.keys()
 
     def exists_ip(self, existing_hosts, ip):
-        for host_opts in existing_hosts.values():
-            if ip == self.get_ip_from_opts(host_opts):
-                return True
-        return False
+        return any(
+            ip == self.get_ip_from_opts(host_opts)
+            for host_opts in existing_hosts.values()
+        )
 
     def delete_host_by_ip(self, existing_hosts, ip):
         for hostname, host_opts in existing_hosts.items():
@@ -358,18 +358,25 @@ class KubesprayInventory(object):
 
     def set_kube_node(self, hosts):
         for host in hosts:
-            if len(self.yaml_config['all']['hosts']) >= SCALE_THRESHOLD:
-                if host in self.yaml_config['all']['children']['etcd']['hosts']:  # noqa
-                    self.debug("Not adding {0} to kube_node group because of "
-                               "scale deployment and host is in etcd "
-                               "group.".format(host))
-                    continue
-            if len(self.yaml_config['all']['hosts']) >= MASSIVE_SCALE_THRESHOLD:  # noqa
-                if host in self.yaml_config['all']['children']['kube_control_plane']['hosts']:  # noqa
-                    self.debug("Not adding {0} to kube_node group because of "
-                               "scale deployment and host is in "
-                               "kube_control_plane group.".format(host))
-                    continue
+            if (
+                len(self.yaml_config['all']['hosts']) >= SCALE_THRESHOLD
+                and host in self.yaml_config['all']['children']['etcd']['hosts']
+            ):
+                self.debug("Not adding {0} to kube_node group because of "
+                           "scale deployment and host is in etcd "
+                           "group.".format(host))
+                continue
+            if (
+                len(self.yaml_config['all']['hosts']) >= MASSIVE_SCALE_THRESHOLD
+                and host
+                in self.yaml_config['all']['children']['kube_control_plane'][
+                    'hosts'
+                ]
+            ):
+                self.debug("Not adding {0} to kube_node group because of "
+                           "scale deployment and host is in "
+                           "kube_control_plane group.".format(host))
+                continue
             self.add_host_to_group('kube_node', host)
 
     def set_etcd(self, hosts):
@@ -455,9 +462,11 @@ MASSIVE_SCALE_THRESHOLD Separate K8s control-plane and ETCD if # of nodes >= 200
         print(' '.join(self.yaml_config['all']['hosts'].keys()))
 
     def print_ips(self):
-        ips = []
-        for host, opts in self.yaml_config['all']['hosts'].items():
-            ips.append(self.get_ip_from_opts(opts))
+        ips = [
+            self.get_ip_from_opts(opts)
+            for host, opts in self.yaml_config['all']['hosts'].items()
+        ]
+
         print(' '.join(ips))
 
 
